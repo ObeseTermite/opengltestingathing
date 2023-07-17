@@ -181,7 +181,7 @@ int main(){
 
     vec3 pos = {0,0,-3};
 
-    vec3 rotation = {0,0,0};
+    vec3 rotation = {0,-90,0};
 
     float speed = 3;
     float rotation_speed = 100;
@@ -195,26 +195,43 @@ int main(){
         previous_seconds = current_seconds;
         printf("framerate: %d\n",(int)(1/deltatime));
 
+        vec3 direction;
+        direction[0] = cos(degToRad(rotation[1])) * cos(degToRad(rotation[0]));
+        direction[1] = sin(degToRad(rotation[0]));
+        direction[2] = sin(degToRad(rotation[1])) * cos(degToRad(rotation[0]));
+        glm_vec3_scale(direction,speed*deltatime,direction);
+
+        vec3 perpendicular;
+
+        glm_vec3_cross(direction,(vec3){0,1,0},perpendicular);
+
+        vec3 vertical;
+
+        vertical[0] = cos(degToRad(rotation[1])) * cos(degToRad(rotation[0]+90));
+        vertical[1] = sin(degToRad(rotation[0]+90));
+        vertical[2] = sin(degToRad(rotation[1])) * cos(degToRad(rotation[0]+90));
+        glm_vec3_scale(vertical,speed*deltatime,vertical);
+
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)) {
             glfwSetWindowShouldClose(window, 1);
         }
-        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A)) {
-            pos[0]+=speed*deltatime;
-        }
-        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D)) {
-            pos[0]-=speed*deltatime;
-        }
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W)) {
-            pos[2]+=speed*deltatime;
+            glm_vec3_sub(pos,direction,pos);
         }
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S)) {
-            pos[2]-=speed*deltatime;
+            glm_vec3_add(pos,direction,pos);
+        }
+        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A)) {
+            glm_vec3_add(pos,perpendicular,pos);
+        }
+        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D)) {
+            glm_vec3_sub(pos,perpendicular,pos);
         }
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_Q)) {
-            pos[1]+=speed*deltatime;
+            glm_vec3_add(pos,vertical,pos);
         }
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_E)) {
-            pos[1]-=speed*deltatime;
+            glm_vec3_sub(pos,vertical,pos);
         }
 
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT)) {
@@ -241,7 +258,7 @@ int main(){
         
         glm_rotate_make(view,degToRad(-rotation[0]),(vec3){1,0,0});
         glm_rotate(view,degToRad(rotation[2]),(vec3){0,0,1});
-        glm_rotate(view,degToRad(rotation[1]),(vec3){0,1,0});
+        glm_rotate(view,degToRad(rotation[1]+90),(vec3){0,1,0});
         glm_translate(view, pos);
         
     
