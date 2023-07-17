@@ -202,10 +202,6 @@ int main(){
         direction[2] = sin(degToRad(rotation[1])) * cos(degToRad(rotation[0]));
         glm_vec3_scale(direction,speed*deltatime,direction);
 
-        vec3 perpendicular;
-
-        glm_vec3_cross(direction,(vec3){0,1,0},perpendicular);
-
         vec3 vertical;
 
         vertical[0] = cos(degToRad(rotation[1])) * cos(degToRad(rotation[0]+90));
@@ -214,6 +210,11 @@ int main(){
         glm_vec3_scale(vertical,speed*deltatime,vertical);
 
         glfwSetCursorPosCallback(window, mouse_callback);   
+
+        vec3 perpendicular;
+
+        glm_vec3_crossn(direction,vertical,perpendicular);
+        glm_vec3_scale(perpendicular,speed*deltatime,perpendicular);
 
         if(rotation[0] > 89.0f)
             rotation[0] =  89.0f;
