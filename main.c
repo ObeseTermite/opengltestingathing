@@ -23,13 +23,15 @@
 int g_gl_width = 512;
 int g_gl_height = 512;
 
+float lastX = 256;
+float lastY = 256;
+
+vec3 rotation = {0,-90,0};
+
 // a call-back function
-void glfw_window_size_callback(GLFWwindow* window, int width, int height) {
-  g_gl_width = width;
-  g_gl_height = height;
-  
-  /* update any perspective matrices used here */
-}
+void glfw_window_size_callback(GLFWwindow* window, int width, int height);
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 int main(){
     // start GL context and O/S window using the GLFW helper library
@@ -48,6 +50,8 @@ int main(){
         return 1;
     }
     glfwMakeContextCurrent(window);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
+    
                                     
     // start GLEW extension handler
     glewExperimental = GL_TRUE;
@@ -181,13 +185,10 @@ int main(){
 
     vec3 pos = {0,0,-3};
 
-    vec3 rotation = {0,-90,0};
-
     float speed = 3;
     float rotation_speed = 100;
 
     double previous_seconds = glfwGetTime();
-     
 
     while(!glfwWindowShouldClose(window)) {
         double current_seconds = glfwGetTime();
@@ -211,6 +212,14 @@ int main(){
         vertical[1] = sin(degToRad(rotation[0]+90));
         vertical[2] = sin(degToRad(rotation[1])) * cos(degToRad(rotation[0]+90));
         glm_vec3_scale(vertical,speed*deltatime,vertical);
+
+        glfwSetCursorPosCallback(window, mouse_callback);   
+
+        if(rotation[0] > 89.0f)
+            rotation[0] =  89.0f;
+        if(rotation[0] < -89.0f)
+            rotation[0] = -89.0f;
+
 
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)) {
             glfwSetWindowShouldClose(window, 1);
@@ -294,4 +303,25 @@ int main(){
     // close GL context and any other GLFW resources
     glfwTerminate();
     return 0;
+}
+
+void glfw_window_size_callback(GLFWwindow* window, int width, int height) {
+  g_gl_width = width;
+  g_gl_height = height;
+  
+  /* update any perspective matrices used here */
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos){
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates range from bottom to top
+    lastX = xpos;
+    lastY = ypos;
+
+    const float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    rotation[1] += xoffset;
+    rotation[0] += yoffset; 
 }
